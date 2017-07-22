@@ -1,0 +1,4 @@
+debug
+vendor
+main
+.debug/tmp-*

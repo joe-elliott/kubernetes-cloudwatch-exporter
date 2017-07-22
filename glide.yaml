@@ -1,0 +1,6 @@
+package: .
+import:
+- package: k8s.io/client-go
+  version: v2.0.0
+- package: github.com/prometheus/client_golang
+  version: v0.8.0
