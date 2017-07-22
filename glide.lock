@@ -1,6 +1,8 @@
-hash: a29b1a3935c3ed98c522eae3e29783a1943bc23369b53f898b2fbe62c5143b79
-updated: 2017-06-25T20:52:30.479371911-04:00
+hash: 7eee11685d8a945ddd4bc1df7267a5688ecb6a3f6c583e9db1636c3f473a14d6
+updated: 2017-07-22T17:45:36.488039164-04:00
 imports:
-- name: github.com/golang/glog
-  version: 44145f04b68cf362d9c4df2182967c2275eaefed
+- name: github.com/prometheus/client_golang
+  version: c5b7fccd204277076155f10851dad72b76a49317
+- name: k8s.io/client-go
+  version: e121606b0d09b2e1c467183ee46217fa85a6b672
 testImports: []
