@@ -1,8 +1,36 @@
-hash: 7eee11685d8a945ddd4bc1df7267a5688ecb6a3f6c583e9db1636c3f473a14d6
-updated: 2017-07-22T17:45:36.488039164-04:00
+hash: 8d508fd386679485c22c783e6954bea11549b6a106d05bb421c380ff99b5b086
+updated: 2017-07-22T17:53:35.793903625-04:00
 imports:
+- name: github.com/aws/aws-sdk-go
+  version: afd601335e2a72d43caa3af6bd2abe512fcc3bfd
+  subpackages:
+  - aws
+  - aws/awserr
+  - aws/awsutil
+  - aws/client
+  - aws/client/metadata
+  - aws/corehandlers
+  - aws/credentials
+  - aws/credentials/ec2rolecreds
+  - aws/credentials/endpointcreds
+  - aws/credentials/stscreds
+  - aws/defaults
+  - aws/ec2metadata
+  - aws/endpoints
+  - aws/request
+  - aws/session
+  - aws/signer/v4
+  - internal/shareddefaults
+  - private/protocol
+  - private/protocol/query
+  - private/protocol/query/queryutil
+  - private/protocol/rest
+  - private/protocol/xml/xmlutil
+  - service/sts
+- name: github.com/go-ini/ini
+  version: 3d73f4b845efdf9989fffd4b4e562727744a34ba
+- name: github.com/jmespath/go-jmespath
+  version: bd40a432e4c76585ef6b72d3fd96fb9b6dc7b68d
 - name: github.com/prometheus/client_golang
   version: c5b7fccd204277076155f10851dad72b76a49317
-- name: k8s.io/client-go
-  version: e121606b0d09b2e1c467183ee46217fa85a6b672
 testImports: []
