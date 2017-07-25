@@ -16,7 +16,7 @@ import (
 func main() {
 	awsRegion := endpoints.UsEast1RegionID
 	tagName := "KubernetesCluster"
-	tagValue := "k8s-1.qsrpolarisdev.net"
+	tagValue := "myCluster"
 
 	sess := session.Must(session.NewSession(&aws.Config{
 		Region: aws.String(awsRegion),
