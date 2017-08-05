@@ -32,52 +32,64 @@ func main() {
 	}
 
 	elbNames := make([]*string, 0)
+	elbNamesInCluster := make([]*string, 0)
 
 	for _, elbDesc := range loadBalancers.LoadBalancerDescriptions {
 		elbNames = append(elbNames, elbDesc.LoadBalancerName)
 	}
 
-	// get tags
-	loadBalancerTags, err := elbClient.DescribeTags(&elb.DescribeTagsInput{
-		LoadBalancerNames: elbNames,
-	})
+	for i := 0; i < (len(elbNames)/20)+1; i++ {
 
-	if err != nil {
-		log.Fatalf("describeTags %v", err)
-	}
+		startSlice := i * 20
+		endSlice := (i + 1) * 20
 
-	// filter to only names that belong to the cluster
-	elbNames = make([]*string, 0)
-	fmt.Println("In Cluster:")
+		if endSlice > len(elbNames) {
+			endSlice = len(elbNames)
+		}
 
-	for _, elbTags := range loadBalancerTags.TagDescriptions {
-		inCluster := false
+		// get tags
+		loadBalancerTags, err := elbClient.DescribeTags(&elb.DescribeTagsInput{
+			LoadBalancerNames: elbNames[startSlice:endSlice],
+		})
 
-		for _, kvp := range elbTags.Tags {
-			if *kvp.Key == tagName && *kvp.Value == tagValue {
-				inCluster = true
-				break
+		if err != nil {
+			log.Fatalf("describeTags %v", err)
+		}
+
+		// filter to only names that belong to the cluster
+		fmt.Println("In Cluster:")
+
+		for _, elbTags := range loadBalancerTags.TagDescriptions {
+			inCluster := false
+
+			for _, kvp := range elbTags.Tags {
+				if *kvp.Key == tagName && *kvp.Value == tagValue {
+					inCluster = true
+					break
+				}
+			}
+
+			if inCluster {
+				fmt.Printf("%v\n", *elbTags.LoadBalancerName)
+				elbNamesInCluster = append(elbNamesInCluster, elbTags.LoadBalancerName)
 			}
 		}
-
-		if inCluster {
-			fmt.Printf("%v\n", *elbTags.LoadBalancerName)
-			elbNames = append(elbNames, elbTags.LoadBalancerName)
-		}
 	}
+
+	fmt.Printf("Found %d load balancers\n", len(elbNamesInCluster))
 
 	// query metrics
 	cwClient := cloudwatch.New(sess)
 
 	now := time.Now()
-	then := now.Add(-60 * time.Minute)
+	then := now.Add(-60 * time.Second)
 	metricName := "RequestCount"
-	period := int64(60 * 60)
+	period := int64(60)
 	statistic := "Sum"
 	namespace := "AWS/ELB"
 	dimension := "LoadBalancerName"
 
-	for _, elbName := range elbNames {
+	for _, elbName := range elbNamesInCluster {
 		log.Printf("Getting stats for %v", *elbName)
 
 		metricStats, err := cwClient.GetMetricStatistics(&cloudwatch.GetMetricStatisticsInput{
