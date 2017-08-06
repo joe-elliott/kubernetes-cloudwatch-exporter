@@ -1,25 +1,30 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
-
 	"time"
 
+	"kubernetes-cloudwatch-exporter/settings"
+
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/endpoints"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
 	"github.com/aws/aws-sdk-go/service/elb"
 )
 
+var settingsFile = flag.String("settings-file", "./settings.json", "Path to load as the settings file")
+
 func main() {
-	awsRegion := endpoints.UsEast1RegionID
-	tagName := "KubernetesCluster"
-	tagValue := "myCluster"
+	settings, err := settings.NewSettings(*settingsFile)
+
+	if err != nil {
+		log.Fatalf("settings.NewSettings %v", err)
+	}
 
 	sess := session.Must(session.NewSession(&aws.Config{
-		Region: aws.String(awsRegion),
+		Region: aws.String(settings.AWSRegion),
 	}))
 
 	// get load balancer
@@ -37,6 +42,9 @@ func main() {
 	for _, elbDesc := range loadBalancers.LoadBalancerDescriptions {
 		elbNames = append(elbNames, elbDesc.LoadBalancerName)
 	}
+
+	var tagName = settings.TagName
+	var tagValue = settings.TagValue
 
 	for i := 0; i < (len(elbNames)/20)+1; i++ {
 
