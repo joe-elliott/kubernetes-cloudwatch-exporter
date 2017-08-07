@@ -19,9 +19,9 @@ type ELBSettings struct {
 }
 
 type ELBMetric struct {
-	Name              string
-	Statistic         string
-	ExtendedStatistic string
+	Name               string
+	Statistics         []*string
+	ExtendedStatistics []*string
 }
 
 func NewSettings(filepath string) (*ELBSettings, error) {

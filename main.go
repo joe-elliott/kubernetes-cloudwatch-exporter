@@ -100,7 +100,8 @@ func main() {
 		log.Printf("Requesting Metrics %v", elbMetric)
 
 		metricName := elbMetric.Name
-		statistic := elbMetric.Statistic
+		statistics := elbMetric.Statistics
+		extendedStatistics := elbMetric.ExtendedStatistics
 
 		for _, elbName := range elbNamesInCluster {
 			log.Printf("Requesting for ELB %v", *elbName)
@@ -112,11 +113,11 @@ func main() {
 				}},
 				StartTime:          &start,
 				EndTime:            &end,
-				ExtendedStatistics: nil,
+				ExtendedStatistics: extendedStatistics,
 				MetricName:         &metricName,
 				Namespace:          &namespace,
 				Period:             &period,
-				Statistics:         []*string{&statistic},
+				Statistics:         statistics,
 				Unit:               nil,
 			})
 
