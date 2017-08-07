@@ -26,9 +26,9 @@ func main() {
 		Region: aws.String(settings.AWSRegion),
 	}))
 
-	elbFunc := util.MakeELBNamesFunc(settings.TagName, settings.TagValue, sess)
+	getELBNamesFunc := util.MakeELBNamesFunc(settings.TagName, settings.TagValue, sess)
 
-	elbNamesInCluster, err := elbFunc()
+	elbNamesInCluster, err := getELBNamesFunc()
 
 	if err != nil {
 		log.Fatalf("elbFunc %v", err)
