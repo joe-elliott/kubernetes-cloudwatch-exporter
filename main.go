@@ -89,36 +89,42 @@ func main() {
 	// query metrics
 	cwClient := cloudwatch.New(sess)
 
-	now := time.Now()
-	then := now.Add(-60 * time.Second)
-	metricName := "RequestCount"
-	period := int64(60)
-	statistic := "Sum"
+	start := time.Now().Add(-settings.Delay + -settings.QueryRange)
+	end := start.Add(settings.QueryRange)
+	period := int64(settings.Period.Seconds())
 	namespace := "AWS/ELB"
 	dimension := "LoadBalancerName"
 
-	for _, elbName := range elbNamesInCluster {
-		log.Printf("Getting stats for %v", *elbName)
+	for _, elbMetric := range settings.Metrics {
 
-		metricStats, err := cwClient.GetMetricStatistics(&cloudwatch.GetMetricStatisticsInput{
-			Dimensions: []*cloudwatch.Dimension{&cloudwatch.Dimension{
-				Name:  &dimension,
-				Value: elbName,
-			}},
-			StartTime:          &then,
-			EndTime:            &now,
-			ExtendedStatistics: nil,
-			MetricName:         &metricName,
-			Namespace:          &namespace,
-			Period:             &period,
-			Statistics:         []*string{&statistic},
-			Unit:               nil,
-		})
+		log.Printf("Requesting Metrics %v", elbMetric)
 
-		if err != nil {
-			log.Fatalf("getMetricStatistics %v", err)
+		metricName := elbMetric.Name
+		statistic := elbMetric.Statistic
+
+		for _, elbName := range elbNamesInCluster {
+			log.Printf("Requesting for ELB %v", *elbName)
+
+			metricStats, err := cwClient.GetMetricStatistics(&cloudwatch.GetMetricStatisticsInput{
+				Dimensions: []*cloudwatch.Dimension{&cloudwatch.Dimension{
+					Name:  &dimension,
+					Value: elbName,
+				}},
+				StartTime:          &start,
+				EndTime:            &end,
+				ExtendedStatistics: nil,
+				MetricName:         &metricName,
+				Namespace:          &namespace,
+				Period:             &period,
+				Statistics:         []*string{&statistic},
+				Unit:               nil,
+			})
+
+			if err != nil {
+				log.Fatalf("getMetricStatistics %v", err)
+			}
+
+			fmt.Printf("metricStats %v", *metricStats)
 		}
-
-		fmt.Printf("metricStats %v", *metricStats)
 	}
 }
