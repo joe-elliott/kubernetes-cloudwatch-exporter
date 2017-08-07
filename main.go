@@ -11,7 +11,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
-	"github.com/aws/aws-sdk-go/service/elb"
 )
 
 var settingsFile = flag.String("settings-file", "./settings.json", "Path to load as the settings file")
@@ -27,61 +26,12 @@ func main() {
 		Region: aws.String(settings.AWSRegion),
 	}))
 
-	// get load balancer
-	elbClient := elb.New(sess)
+	elbFunc := util.MakeELBNamesFunc(settings.TagName, settings.TagValue, sess)
 
-	loadBalancers, err := elbClient.DescribeLoadBalancers(nil)
+	elbNamesInCluster, err := elbFunc()
 
 	if err != nil {
-		log.Fatalf("describeLoadBalancers %v", err)
-	}
-
-	elbNames := make([]*string, 0)
-	elbNamesInCluster := make([]*string, 0)
-
-	for _, elbDesc := range loadBalancers.LoadBalancerDescriptions {
-		elbNames = append(elbNames, elbDesc.LoadBalancerName)
-	}
-
-	var tagName = settings.TagName
-	var tagValue = settings.TagValue
-
-	for i := 0; i < (len(elbNames)/20)+1; i++ {
-
-		startSlice := i * 20
-		endSlice := (i + 1) * 20
-
-		if endSlice > len(elbNames) {
-			endSlice = len(elbNames)
-		}
-
-		// get tags
-		loadBalancerTags, err := elbClient.DescribeTags(&elb.DescribeTagsInput{
-			LoadBalancerNames: elbNames[startSlice:endSlice],
-		})
-
-		if err != nil {
-			log.Fatalf("describeTags %v", err)
-		}
-
-		// filter to only names that belong to the cluster
-		fmt.Println("In Cluster:")
-
-		for _, elbTags := range loadBalancerTags.TagDescriptions {
-			inCluster := false
-
-			for _, kvp := range elbTags.Tags {
-				if *kvp.Key == tagName && *kvp.Value == tagValue {
-					inCluster = true
-					break
-				}
-			}
-
-			if inCluster {
-				fmt.Printf("%v\n", *elbTags.LoadBalancerName)
-				elbNamesInCluster = append(elbNamesInCluster, elbTags.LoadBalancerName)
-			}
-		}
+		log.Fatalf("elbFunc %v", err)
 	}
 
 	fmt.Printf("Found %d load balancers\n", len(elbNamesInCluster))
