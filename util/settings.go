@@ -1,4 +1,4 @@
-package settings
+package util
 
 import (
 	"encoding/json"

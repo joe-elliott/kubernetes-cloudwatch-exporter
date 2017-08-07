@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	"kubernetes-cloudwatch-exporter/settings"
+	"kubernetes-cloudwatch-exporter/util"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -17,7 +17,7 @@ import (
 var settingsFile = flag.String("settings-file", "./settings.json", "Path to load as the settings file")
 
 func main() {
-	settings, err := settings.NewSettings(*settingsFile)
+	settings, err := util.NewSettings(*settingsFile)
 
 	if err != nil {
 		log.Fatalf("settings.NewSettings %v", err)
