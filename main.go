@@ -4,13 +4,11 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"time"
 
 	"kubernetes-cloudwatch-exporter/util"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/cloudwatch"
 )
 
 var settingsFile = flag.String("settings-file", "./settings.json", "Path to load as the settings file")
@@ -27,6 +25,7 @@ func main() {
 	}))
 
 	getELBNamesFunc := util.MakeELBNamesFunc(settings.TagName, settings.TagValue, sess)
+	getMetricsFunc := util.MakeMetricsFunc(sess)
 
 	elbNamesInCluster, err := getELBNamesFunc()
 
@@ -36,46 +35,18 @@ func main() {
 
 	fmt.Printf("Found %d load balancers\n", len(elbNamesInCluster))
 
-	// query metrics
-	cwClient := cloudwatch.New(sess)
-
-	start := time.Now().Add(-settings.Delay + -settings.QueryRange)
-	end := start.Add(settings.QueryRange)
-	period := int64(settings.Period.Seconds())
-	namespace := "AWS/ELB"
-	dimension := "LoadBalancerName"
-
-	for _, elbMetric := range settings.Metrics {
-
-		log.Printf("Requesting Metrics %v", elbMetric)
-
-		metricName := elbMetric.Name
-		statistics := elbMetric.Statistics
-		extendedStatistics := elbMetric.ExtendedStatistics
-
-		for _, elbName := range elbNamesInCluster {
+	for _, elbName := range elbNamesInCluster {
+		for _, elbMetric := range settings.Metrics {
+			log.Printf("Requesting Metrics %v", elbMetric)
 			log.Printf("Requesting for ELB %v", *elbName)
 
-			metricStats, err := cwClient.GetMetricStatistics(&cloudwatch.GetMetricStatisticsInput{
-				Dimensions: []*cloudwatch.Dimension{&cloudwatch.Dimension{
-					Name:  &dimension,
-					Value: elbName,
-				}},
-				StartTime:          &start,
-				EndTime:            &end,
-				ExtendedStatistics: extendedStatistics,
-				MetricName:         &metricName,
-				Namespace:          &namespace,
-				Period:             &period,
-				Statistics:         statistics,
-				Unit:               nil,
-			})
+			datapoints, err := getMetricsFunc(elbName, &elbMetric, settings)
 
 			if err != nil {
-				log.Fatalf("getMetricStatistics %v", err)
+				log.Fatalf("metricsFunc %v", err)
 			}
 
-			fmt.Printf("metricStats %v", *metricStats)
+			log.Printf("Datapoints %v", datapoints)
 		}
 	}
 }
