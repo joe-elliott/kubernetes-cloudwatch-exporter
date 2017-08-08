@@ -1,5 +1,5 @@
 hash: 8d508fd386679485c22c783e6954bea11549b6a106d05bb421c380ff99b5b086
-updated: 2017-07-22T17:53:35.793903625-04:00
+updated: 2017-08-07T22:50:43.029649456-04:00
 imports:
 - name: github.com/aws/aws-sdk-go
   version: afd601335e2a72d43caa3af6bd2abe512fcc3bfd
@@ -26,11 +26,42 @@ imports:
   - private/protocol/query/queryutil
   - private/protocol/rest
   - private/protocol/xml/xmlutil
+  - service/cloudwatch
+  - service/elb
   - service/sts
+- name: github.com/beorn7/perks
+  version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
+  subpackages:
+  - quantile
 - name: github.com/go-ini/ini
   version: 3d73f4b845efdf9989fffd4b4e562727744a34ba
+- name: github.com/golang/protobuf
+  version: 8616e8ee5e20a1704615e6c8d7afcdac06087a67
+  subpackages:
+  - proto
 - name: github.com/jmespath/go-jmespath
   version: bd40a432e4c76585ef6b72d3fd96fb9b6dc7b68d
+- name: github.com/matttproud/golang_protobuf_extensions
+  version: c12348ce28de40eed0136aa2b644d0ee0650e56c
+  subpackages:
+  - pbutil
 - name: github.com/prometheus/client_golang
   version: c5b7fccd204277076155f10851dad72b76a49317
+  subpackages:
+  - prometheus
+  - prometheus/promhttp
+- name: github.com/prometheus/client_model
+  version: 6f3806018612930941127f2a7c6c453ba2c527d2
+  subpackages:
+  - go
+- name: github.com/prometheus/common
+  version: 0866df4b85a18d652b6965be022d007cdf076822
+  subpackages:
+  - expfmt
+  - internal/bitbucket.org/ww/goautoneg
+  - model
+- name: github.com/prometheus/procfs
+  version: e645f4e5aaa8506fc71d6edbc5c4ff02c04c46f2
+  subpackages:
+  - xfs
 testImports: []
