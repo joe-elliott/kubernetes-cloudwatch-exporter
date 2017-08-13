@@ -24,7 +24,7 @@ var (
 			Name: "k8s_cw_metric",
 			Help: "Cloudwatch Metrics.",
 		},
-		[]string{"elb", "name", "statistic"},
+		[]string{"elb", "app", "name", "statistic"},
 	)
 )
 
@@ -43,26 +43,26 @@ func main() {
 		Region: aws.String(settings.AWSRegion),
 	}))
 
-	getELBNamesFunc := util.MakeELBNamesFunc(settings.TagName, settings.TagValue, sess)
+	getELBNamesFunc := util.MakeELBNamesFunc(settings.TagName, settings.TagValue, settings.AppTagName, sess)
 	getMetricsFunc := util.MakeMetricsFunc(sess)
 
 	go func() {
 		for {
-			elbNamesInCluster, err := getELBNamesFunc()
+			elbDescriptions, err := getELBNamesFunc()
 
 			if err != nil {
 				log.Fatalf("elbFunc %v", err)
 			}
 
-			fmt.Printf("Found %d load balancers\n", len(elbNamesInCluster))
+			fmt.Printf("Found %d load balancers\n", len(elbDescriptions))
 
-			for _, elbName := range elbNamesInCluster {
+			for _, elbDesc := range elbDescriptions {
 				for _, elbMetric := range settings.Metrics {
 
 					log.Printf("Requesting Metrics %v", elbMetric)
-					log.Printf("Requesting for ELB %v", *elbName)
+					log.Printf("Requesting for ELB %v", *elbDesc.Name)
 
-					datapoints, err := getMetricsFunc(elbName, &elbMetric, settings)
+					datapoints, err := getMetricsFunc(elbDesc.Name, &elbMetric, settings)
 
 					if err != nil {
 						log.Fatalf("metricsFunc %v", err)
@@ -70,7 +70,7 @@ func main() {
 
 					log.Printf("Datapoints %v", datapoints)
 
-					observeDatapoints(datapoints, elbMetric, *elbName)
+					observeDatapoints(datapoints, elbMetric, elbDesc)
 				}
 			}
 
@@ -83,11 +83,11 @@ func main() {
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
-func observeDatapoints(datapoints []*cloudwatch.Datapoint, elbMetric util.ELBMetric, elbName string) {
+func observeDatapoints(datapoints []*cloudwatch.Datapoint, elbMetric util.ELBMetric, elbDesc *util.ELBDescription) {
 
 	for _, dp := range datapoints {
 		for n, v := range getMetrics(dp) {
-			promMetrics.WithLabelValues(elbName, elbMetric.Name, n).Set(v)
+			promMetrics.WithLabelValues(*elbDesc.Name, *elbDesc.AppName, elbMetric.Name, n).Set(v)
 		}
 	}
 }

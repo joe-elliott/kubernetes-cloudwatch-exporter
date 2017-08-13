@@ -15,6 +15,7 @@ type ELBSettings struct {
 	AWSRegion  string
 	TagName    string
 	TagValue   string
+	AppTagName string
 	Metrics    []ELBMetric
 }
 
@@ -45,6 +46,7 @@ func (this *ELBSettings) UnmarshalJSON(data []byte) error {
 		AWSRegion:  endpoints.UsEast1RegionID,
 		TagName:    "KubernetesCluster",
 		TagValue:   "MyCluster",
+		AppTagName: "kubernetes.io/service-name",
 		Metrics:    nil,
 	}
 

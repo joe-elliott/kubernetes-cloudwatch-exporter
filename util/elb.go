@@ -7,13 +7,18 @@ import (
 	"github.com/aws/aws-sdk-go/service/elb"
 )
 
-func MakeELBNamesFunc(tagName string, tagValue string, session *session.Session) func() ([]*string, error) {
+type ELBDescription struct {
+	Name    *string
+	AppName *string
+}
+
+func MakeELBNamesFunc(tagName string, tagValue string, appTagName string, session *session.Session) func() ([]*ELBDescription, error) {
 
 	// get load balancer
 	elbClient := elb.New(session)
 
 	//
-	return func() ([]*string, error) {
+	return func() ([]*ELBDescription, error) {
 		loadBalancers, err := elbClient.DescribeLoadBalancers(nil)
 
 		if err != nil {
@@ -21,7 +26,7 @@ func MakeELBNamesFunc(tagName string, tagValue string, session *session.Session)
 		}
 
 		elbNames := make([]*string, 0)
-		elbNamesInCluster := make([]*string, 0)
+		elbDescriptions := make([]*ELBDescription, 0)
 
 		for _, elbDesc := range loadBalancers.LoadBalancerDescriptions {
 			elbNames = append(elbNames, elbDesc.LoadBalancerName)
@@ -50,21 +55,31 @@ func MakeELBNamesFunc(tagName string, tagValue string, session *session.Session)
 
 			for _, elbTags := range loadBalancerTags.TagDescriptions {
 				inCluster := false
+				appName := ""
 
 				for _, kvp := range elbTags.Tags {
 					if *kvp.Key == tagName && *kvp.Value == tagValue {
 						inCluster = true
-						break
+					}
+
+					if *kvp.Key == appTagName {
+						appName = *kvp.Value
 					}
 				}
 
 				if inCluster {
 					fmt.Printf("%v\n", *elbTags.LoadBalancerName)
-					elbNamesInCluster = append(elbNamesInCluster, elbTags.LoadBalancerName)
+
+					desc := &ELBDescription{
+						Name:    elbTags.LoadBalancerName,
+						AppName: &appName,
+					}
+
+					elbDescriptions = append(elbDescriptions, desc)
 				}
 			}
 		}
 
-		return elbNamesInCluster, nil
+		return elbDescriptions, nil
 	}
 }
