@@ -18,22 +18,22 @@ import (
 )
 
 var (
-	settingsFile = flag.String("settings-file", "./settings.json", "Path to load as the settings file")
-	promMetrics  = prometheus.NewGaugeVec(
+	_settingsFile = flag.String("settings-file", "./settings.json", "Path to load as the settings file")
+	_elbMetrics   = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "k8s_cw_metric",
-			Help: "Cloudwatch Metrics.",
+			Help: "Kubernetes ELB metrics",
 		},
 		[]string{"elb", "app", "namespace", "metric", "statistic"},
 	)
 )
 
 func init() {
-	prometheus.MustRegister(promMetrics)
+	prometheus.MustRegister(_elbMetrics)
 }
 
 func main() {
-	settings, err := util.NewSettings(*settingsFile)
+	settings, err := util.NewSettings(*_settingsFile)
 
 	if err != nil {
 		log.Fatalf("settings.NewSettings %v", err)
@@ -87,7 +87,7 @@ func observeDatapoints(datapoints []*cloudwatch.Datapoint, elbMetric util.ELBMet
 
 	for _, dp := range datapoints {
 		for n, v := range getMetrics(dp) {
-			promMetrics.WithLabelValues(*elbDesc.Name, *elbDesc.AppName, *elbDesc.AppNamespace, elbMetric.Name, n).Set(v)
+			_elbMetrics.WithLabelValues(*elbDesc.Name, *elbDesc.AppName, *elbDesc.AppNamespace, elbMetric.Name, n).Set(v)
 		}
 	}
 }
