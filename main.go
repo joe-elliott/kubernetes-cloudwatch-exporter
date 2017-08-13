@@ -21,8 +21,10 @@ var (
 	_settingsFile = flag.String("settings-file", "./settings.json", "Path to load as the settings file")
 	_elbMetrics   = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
-			Name: "k8s_cw_metric",
-			Help: "Kubernetes ELB metrics",
+			Namespace: "k8scw",
+			Subsystem: "elb",
+			Name:      "metric",
+			Help:      "Kubernetes ELB metrics",
 		},
 		[]string{"elb", "app", "namespace", "metric", "statistic"},
 	)
