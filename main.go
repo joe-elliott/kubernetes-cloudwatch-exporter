@@ -12,18 +12,19 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/cloudwatch"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 var (
 	settingsFile = flag.String("settings-file", "./settings.json", "Path to load as the settings file")
-	promMetrics  = prometheus.NewSummaryVec(
-		prometheus.SummaryOpts{
+	promMetrics  = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
 			Name: "k8s_cw_metric",
 			Help: "Cloudwatch Metrics.",
 		},
-		[]string{"elb"},
+		[]string{"elb", "name", "statistic"},
 	)
 )
 
@@ -57,6 +58,7 @@ func main() {
 
 			for _, elbName := range elbNamesInCluster {
 				for _, elbMetric := range settings.Metrics {
+
 					log.Printf("Requesting Metrics %v", elbMetric)
 					log.Printf("Requesting for ELB %v", *elbName)
 
@@ -68,14 +70,7 @@ func main() {
 
 					log.Printf("Datapoints %v", datapoints)
 
-					// todo: find and choose correct property.
-					//       report all values
-					//       read docs and figure out how to actually do this all correctly
-					if len(datapoints) > 0 && datapoints[0].Average != nil {
-						promMetrics.WithLabelValues(*elbName).Observe(*datapoints[0].Average)
-					} else {
-						promMetrics.WithLabelValues(*elbName).Observe(0)
-					}
+					observeDatapoints(datapoints, elbMetric, *elbName)
 				}
 			}
 
@@ -86,4 +81,46 @@ func main() {
 	// Expose the registered metrics via HTTP.
 	http.Handle("/metrics", promhttp.Handler())
 	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+
+func observeDatapoints(datapoints []*cloudwatch.Datapoint, elbMetric util.ELBMetric, elbName string) {
+
+	for _, dp := range datapoints {
+		for n, v := range getMetrics(dp) {
+			promMetrics.WithLabelValues(elbName, elbMetric.Name, n).Set(v)
+		}
+	}
+}
+
+func getMetrics(dp *cloudwatch.Datapoint) map[string]float64 {
+
+	metrics := make(map[string]float64)
+
+	if dp.Average != nil {
+		metrics["Average"] = *dp.Average
+	}
+
+	if dp.Maximum != nil {
+		metrics["Maximum"] = *dp.Maximum
+	}
+
+	if dp.Minimum != nil {
+		metrics["Minimum"] = *dp.Minimum
+	}
+
+	if dp.SampleCount != nil {
+		metrics["SampleCount"] = *dp.SampleCount
+	}
+
+	if dp.Sum != nil {
+		metrics["Sum"] = *dp.Sum
+	}
+
+	if dp.ExtendedStatistics != nil {
+		for p, v := range dp.ExtendedStatistics {
+			metrics[p] = *v
+		}
+	}
+
+	return metrics
 }
