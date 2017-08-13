@@ -23,6 +23,7 @@ type ELBMetric struct {
 	Name               string
 	Statistics         []*string
 	ExtendedStatistics []*string
+	Default            *float64
 }
 
 func NewSettings(filepath string) (*ELBSettings, error) {

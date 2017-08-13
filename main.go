@@ -87,14 +87,29 @@ func main() {
 
 func observeDatapoints(datapoints []*cloudwatch.Datapoint, elbMetric util.ELBMetric, elbDesc *util.ELBDescription) {
 
-	for _, dp := range datapoints {
-		for n, v := range getMetrics(dp) {
-			_elbMetrics.WithLabelValues(*elbDesc.Name, *elbDesc.AppName, *elbDesc.AppNamespace, elbMetric.Name, n).Set(v)
+	if len(datapoints) > 0 {
+		for _, dp := range datapoints {
+			metrics := generateMetrics(dp)
+
+			for n, v := range metrics {
+				_elbMetrics.WithLabelValues(*elbDesc.Name, *elbDesc.AppName, *elbDesc.AppNamespace, elbMetric.Name, n).Set(v)
+			}
+		}
+	} else if elbMetric.Default != nil {
+		// there were no datapoints for this metric.  in this case let's default to 0s to avoid prometheus staleness issues:
+		//  https://github.com/prometheus/prometheus/issues/398
+
+		for _, metric := range elbMetric.Statistics {
+			_elbMetrics.WithLabelValues(*elbDesc.Name, *elbDesc.AppName, *elbDesc.AppNamespace, elbMetric.Name, *metric).Set(*elbMetric.Default)
+		}
+
+		for _, metric := range elbMetric.ExtendedStatistics {
+			_elbMetrics.WithLabelValues(*elbDesc.Name, *elbDesc.AppName, *elbDesc.AppNamespace, elbMetric.Name, *metric).Set(*elbMetric.Default)
 		}
 	}
 }
 
-func getMetrics(dp *cloudwatch.Datapoint) map[string]float64 {
+func generateMetrics(dp *cloudwatch.Datapoint) map[string]float64 {
 
 	metrics := make(map[string]float64)
 
