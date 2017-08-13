@@ -24,7 +24,7 @@ var (
 			Name: "k8s_cw_metric",
 			Help: "Cloudwatch Metrics.",
 		},
-		[]string{"elb", "app", "name", "statistic"},
+		[]string{"elb", "app", "namespace", "metric", "statistic"},
 	)
 )
 
@@ -87,7 +87,7 @@ func observeDatapoints(datapoints []*cloudwatch.Datapoint, elbMetric util.ELBMet
 
 	for _, dp := range datapoints {
 		for n, v := range getMetrics(dp) {
-			promMetrics.WithLabelValues(*elbDesc.Name, *elbDesc.AppName, elbMetric.Name, n).Set(v)
+			promMetrics.WithLabelValues(*elbDesc.Name, *elbDesc.AppName, *elbDesc.AppNamespace, elbMetric.Name, n).Set(v)
 		}
 	}
 }

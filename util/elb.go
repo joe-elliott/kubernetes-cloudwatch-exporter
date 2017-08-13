@@ -2,14 +2,16 @@ package util
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/elb"
 )
 
 type ELBDescription struct {
-	Name    *string
-	AppName *string
+	Name         *string
+	AppName      *string
+	AppNamespace *string
 }
 
 func MakeELBNamesFunc(tagName string, tagValue string, appTagName string, session *session.Session) func() ([]*ELBDescription, error) {
@@ -56,6 +58,7 @@ func MakeELBNamesFunc(tagName string, tagValue string, appTagName string, sessio
 			for _, elbTags := range loadBalancerTags.TagDescriptions {
 				inCluster := false
 				appName := ""
+				appNamespace := ""
 
 				for _, kvp := range elbTags.Tags {
 					if *kvp.Key == tagName && *kvp.Value == tagValue {
@@ -63,7 +66,15 @@ func MakeELBNamesFunc(tagName string, tagValue string, appTagName string, sessio
 					}
 
 					if *kvp.Key == appTagName {
-						appName = *kvp.Value
+						parts := strings.Split(*kvp.Value, "/")
+
+						if len(parts) == 2 {
+							appNamespace = parts[0]
+							appName = parts[1]
+						} else {
+							appNamespace = ""
+							appName = *kvp.Value
+						}
 					}
 				}
 
@@ -71,8 +82,9 @@ func MakeELBNamesFunc(tagName string, tagValue string, appTagName string, sessio
 					fmt.Printf("%v\n", *elbTags.LoadBalancerName)
 
 					desc := &ELBDescription{
-						Name:    elbTags.LoadBalancerName,
-						AppName: &appName,
+						Name:         elbTags.LoadBalancerName,
+						AppName:      &appName,
+						AppNamespace: &appNamespace,
 					}
 
 					elbDescriptions = append(elbDescriptions, desc)
