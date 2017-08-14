@@ -45,7 +45,7 @@ func main() {
 		Region: aws.String(settings.AWSRegion),
 	}))
 
-	getELBNamesFunc := util.MakeELBNamesFunc(settings.TagName, settings.TagValue, settings.AppTagName, sess)
+	getELBNamesFunc := util.MakeELBNamesFunc(settings.TagName, settings.TagValue, settings.AppTagName, settings.RequireAppName, sess)
 	getMetricsFunc := util.MakeMetricsFunc(sess)
 
 	go func() {

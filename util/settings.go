@@ -9,14 +9,15 @@ import (
 )
 
 type ELBSettings struct {
-	Delay      time.Duration
-	Period     time.Duration
-	QueryRange time.Duration
-	AWSRegion  string
-	TagName    string
-	TagValue   string
-	AppTagName string
-	Metrics    []ELBMetric
+	Delay          time.Duration
+	Period         time.Duration
+	QueryRange     time.Duration
+	AWSRegion      string
+	TagName        string
+	TagValue       string
+	AppTagName     string
+	RequireAppName bool
+	Metrics        []ELBMetric
 }
 
 type ELBMetric struct {
@@ -41,14 +42,15 @@ func (this *ELBSettings) UnmarshalJSON(data []byte) error {
 	type Alias ELBSettings
 
 	read := &Alias{
-		Delay:      60 * time.Second,
-		Period:     60 * time.Second,
-		QueryRange: 60 * time.Second,
-		AWSRegion:  endpoints.UsEast1RegionID,
-		TagName:    "KubernetesCluster",
-		TagValue:   "MyCluster",
-		AppTagName: "kubernetes.io/service-name",
-		Metrics:    nil,
+		Delay:          60 * time.Second,
+		Period:         60 * time.Second,
+		QueryRange:     60 * time.Second,
+		AWSRegion:      endpoints.UsEast1RegionID,
+		TagName:        "KubernetesCluster",
+		TagValue:       "MyCluster",
+		AppTagName:     "kubernetes.io/service-name",
+		RequireAppName: false,
+		Metrics:        nil,
 	}
 
 	if err := json.Unmarshal(data, &read); err != nil {

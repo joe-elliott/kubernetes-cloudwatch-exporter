@@ -14,7 +14,7 @@ type ELBDescription struct {
 	AppNamespace *string
 }
 
-func MakeELBNamesFunc(tagName string, tagValue string, appTagName string, session *session.Session) func() ([]*ELBDescription, error) {
+func MakeELBNamesFunc(tagName string, tagValue string, appTagName string, requireAppName bool, session *session.Session) func() ([]*ELBDescription, error) {
 
 	// get load balancer
 	elbClient := elb.New(session)
@@ -76,6 +76,10 @@ func MakeELBNamesFunc(tagName string, tagValue string, appTagName string, sessio
 							appName = *kvp.Value
 						}
 					}
+				}
+
+				if requireAppName && appName == "" {
+					continue
 				}
 
 				if inCluster {

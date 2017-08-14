@@ -23,6 +23,7 @@ Currently it only supports ELB Metrics but suggestions are welcome.
     "tagName": "KubernetesCluster",
     "tagValue": "k8s.example.com",
     "appTagName": "kubernetes.io/service-name",
+    "requireAppName": false,
     "metrics": [
         {
             "name": "RequestCount",
@@ -44,6 +45,7 @@ Currently it only supports ELB Metrics but suggestions are welcome.
 - `tagName` - Tag name to use for cluster name.
 - `tagValue` - Cluster name to search for.
 - `appTagName` - Tag to use to extract application name.
+- `requireAppName` - Flag to control whether ELBs with no app name will be included.  This can be used to exclude the API elb if that's desirable.
 
 #### Sample Metrics
 
