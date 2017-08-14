@@ -35,6 +35,8 @@ func init() {
 }
 
 func main() {
+	flag.Parse()
+
 	settings, err := util.NewSettings(*_settingsFile)
 
 	if err != nil {
