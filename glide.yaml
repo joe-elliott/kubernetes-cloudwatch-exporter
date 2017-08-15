@@ -4,3 +4,4 @@ import:
   version: v1.10.14
 - package: github.com/prometheus/client_golang
   version: v0.8.0
+- package: github.com/op/go-logging

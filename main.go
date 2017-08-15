@@ -2,9 +2,9 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"kubernetes-cloudwatch-exporter/util"
 
@@ -13,6 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
+	"github.com/op/go-logging"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -38,11 +39,19 @@ var (
 			Help:      "Kubernetes Cloudwatch Exporter Errors",
 		},
 	)
+
+	_log       = logging.MustGetLogger("cloudwatch-exporter")
+	_logFormat = logging.MustStringFormatter(`%{time:15:04:05.000} %{level:.4s} %{message}`)
 )
 
 func init() {
 	prometheus.MustRegister(_elbMetrics)
 	prometheus.MustRegister(_errorTotal)
+
+	backend := logging.NewLogBackend(os.Stdout, "", 0)
+	backendFormatted := logging.NewBackendFormatter(backend, _logFormat)
+
+	logging.SetBackend(backendFormatted)
 }
 
 func main() {
@@ -51,7 +60,7 @@ func main() {
 	settings, err := util.NewSettings(*_settingsFile)
 
 	if err != nil {
-		log.Fatalf("settings.NewSettings %v", err)
+		_log.Errorf("settings.NewSettings %v", err)
 	}
 
 	sess := session.Must(session.NewSession(&aws.Config{
@@ -67,25 +76,25 @@ func main() {
 
 			if err != nil {
 				_errorTotal.Inc()
-				log.Fatalf("elbFunc %v", err)
+				_log.Errorf("elbFunc %v", err)
 			}
 
-			fmt.Printf("Found %d load balancers\n", len(elbDescriptions))
+			_log.Infof("Found %d load balancers\n", len(elbDescriptions))
 
 			for _, elbDesc := range elbDescriptions {
 				for _, elbMetric := range settings.Metrics {
 
-					log.Printf("Requesting Metrics %v", elbMetric)
-					log.Printf("Requesting for ELB %v", *elbDesc.Name)
+					_log.Infof("Requesting Metrics %v", elbMetric)
+					_log.Infof("Requesting for ELB %v", *elbDesc.Name)
 
 					datapoints, err := getMetricsFunc(elbDesc.Name, &elbMetric, settings)
 
 					if err != nil {
 						_errorTotal.Inc()
-						log.Fatalf("metricsFunc %v", err)
+						_log.Errorf("metricsFunc %v", err)
 					}
 
-					log.Printf("Datapoints %v", datapoints)
+					_log.Infof("Datapoints %v", datapoints)
 
 					observeDatapoints(datapoints, elbMetric, elbDesc)
 				}

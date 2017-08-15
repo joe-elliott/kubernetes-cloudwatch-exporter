@@ -1,5 +1,5 @@
-hash: 8d508fd386679485c22c783e6954bea11549b6a106d05bb421c380ff99b5b086
-updated: 2017-08-07T22:50:43.029649456-04:00
+hash: 7e675c08596a503d0c3abfcc94cf6ad5e63aab619a86c8ffb72c53aa2e7fb065
+updated: 2017-08-14T20:33:14.436248382-04:00
 imports:
 - name: github.com/aws/aws-sdk-go
   version: afd601335e2a72d43caa3af6bd2abe512fcc3bfd
@@ -34,7 +34,7 @@ imports:
   subpackages:
   - quantile
 - name: github.com/go-ini/ini
-  version: 3d73f4b845efdf9989fffd4b4e562727744a34ba
+  version: c787282c39ac1fc618827141a1f762240def08a3
 - name: github.com/golang/protobuf
   version: 8616e8ee5e20a1704615e6c8d7afcdac06087a67
   subpackages:
@@ -45,6 +45,8 @@ imports:
   version: c12348ce28de40eed0136aa2b644d0ee0650e56c
   subpackages:
   - pbutil
+- name: github.com/op/go-logging
+  version: 970db520ece77730c7e4724c61121037378659d9
 - name: github.com/prometheus/client_golang
   version: c5b7fccd204277076155f10851dad72b76a49317
   subpackages:

@@ -1,11 +1,11 @@
 package util
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/elb"
+	logging "github.com/op/go-logging"
 )
 
 type ELBDescription struct {
@@ -13,6 +13,8 @@ type ELBDescription struct {
 	AppName      *string
 	AppNamespace *string
 }
+
+var _log = logging.MustGetLogger("cloudwatch-exporter")
 
 func MakeELBNamesFunc(tagName string, tagValue string, appTagName string, requireAppName bool, session *session.Session) func() ([]*ELBDescription, error) {
 
@@ -53,7 +55,7 @@ func MakeELBNamesFunc(tagName string, tagValue string, appTagName string, requir
 			}
 
 			// filter to only names that belong to the cluster
-			fmt.Println("In Cluster:")
+			_log.Debug("In Cluster:")
 
 			for _, elbTags := range loadBalancerTags.TagDescriptions {
 				inCluster := false
@@ -83,7 +85,7 @@ func MakeELBNamesFunc(tagName string, tagValue string, appTagName string, requir
 				}
 
 				if inCluster {
-					fmt.Printf("%v\n", *elbTags.LoadBalancerName)
+					_log.Debugf("%v\n", *elbTags.LoadBalancerName)
 
 					desc := &ELBDescription{
 						Name:         elbTags.LoadBalancerName,
