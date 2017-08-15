@@ -63,6 +63,8 @@ func main() {
 		_log.Errorf("settings.NewSettings %v", err)
 	}
 
+	_log.Infof("Settings %+v", settings)
+
 	sess := session.Must(session.NewSession(&aws.Config{
 		Region: aws.String(settings.AWSRegion),
 	}))
