@@ -6,6 +6,10 @@ RUN curl https://glide.sh/get | sh
 
 # copy in code, resolve dependencies and build
 COPY . .
+
+RUN apk add --update ca-certificates && \
+    rm -rf /var/cache/apk/* /tmp/*
+
 RUN    glide up -v \
     && CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app .
 
