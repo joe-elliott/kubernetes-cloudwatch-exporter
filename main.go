@@ -17,21 +17,32 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
+const prometheusNamespace = "k8scw"
+
 var (
 	_settingsFile = flag.String("settings-file", "./settings.json", "Path to load as the settings file")
 	_elbMetrics   = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
-			Namespace: "k8scw",
+			Namespace: prometheusNamespace,
 			Subsystem: "elb",
 			Name:      "metric",
 			Help:      "Kubernetes ELB metrics",
 		},
 		[]string{"elb", "app", "namespace", "metric", "statistic"},
 	)
+	_errorTotal = prometheus.NewGauge(
+		prometheus.GaugeOpts{
+			Namespace: prometheusNamespace,
+			Subsystem: "error",
+			Name:      "total",
+			Help:      "Kubernetes Cloudwatch Exporter Errors",
+		},
+	)
 )
 
 func init() {
 	prometheus.MustRegister(_elbMetrics)
+	prometheus.MustRegister(_errorTotal)
 }
 
 func main() {
@@ -55,6 +66,7 @@ func main() {
 			elbDescriptions, err := getELBNamesFunc()
 
 			if err != nil {
+				_errorTotal.Inc()
 				log.Fatalf("elbFunc %v", err)
 			}
 
@@ -69,6 +81,7 @@ func main() {
 					datapoints, err := getMetricsFunc(elbDesc.Name, &elbMetric, settings)
 
 					if err != nil {
+						_errorTotal.Inc()
 						log.Fatalf("metricsFunc %v", err)
 					}
 
