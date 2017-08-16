@@ -13,9 +13,9 @@ func MakeMetricsFunc(session *session.Session) func(*string, *ELBMetric, *ELBSet
 
 	return func(elbName *string, metric *ELBMetric, settings *ELBSettings) ([]*cloudwatch.Datapoint, error) {
 
-		start := time.Now().Add(-settings.Delay + -settings.QueryRange)
-		end := start.Add(settings.QueryRange)
-		period := int64(settings.Period.Seconds())
+		start := time.Now().Add(time.Duration(-settings.DelaySeconds+-settings.QuerySeconds) * time.Second)
+		end := start.Add(time.Duration(settings.QuerySeconds) * time.Second)
+		period := settings.PeriodSeconds
 		namespace := "AWS/ELB"
 		dimension := "LoadBalancerName"
 

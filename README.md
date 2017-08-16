@@ -16,9 +16,9 @@ Currently it only supports ELB Metrics but suggestions are welcome.
 
 ```
 {
-    "delay": "60s",
-    "period": "60s",
-    "queryRange": "60s",
+    "delaySeconds": 60,
+    "periodSeconds": 60,
+    "querySeconds": 60,
     "awsRegion": "us-east-1",
     "tagName": "KubernetesCluster",
     "tagValue": "k8s.example.com",

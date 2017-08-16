@@ -3,15 +3,14 @@ package util
 import (
 	"encoding/json"
 	"io/ioutil"
-	"time"
 
 	"github.com/aws/aws-sdk-go/aws/endpoints"
 )
 
 type ELBSettings struct {
-	Delay          time.Duration
-	Period         time.Duration
-	QueryRange     time.Duration
+	DelaySeconds   int64
+	PeriodSeconds  int64
+	QuerySeconds   int64
 	AWSRegion      string
 	TagName        string
 	TagValue       string
@@ -29,12 +28,18 @@ type ELBMetric struct {
 
 func NewSettings(filepath string) (*ELBSettings, error) {
 	raw, err := ioutil.ReadFile(filepath)
+
 	if err != nil {
 		return nil, err
 	}
 
 	var settings ELBSettings
-	json.Unmarshal(raw, &settings)
+	err = json.Unmarshal(raw, &settings)
+
+	if err != nil {
+		return nil, err
+	}
+
 	return &settings, nil
 }
 
@@ -42,9 +47,9 @@ func (this *ELBSettings) UnmarshalJSON(data []byte) error {
 	type Alias ELBSettings
 
 	read := &Alias{
-		Delay:          60 * time.Second,
-		Period:         60 * time.Second,
-		QueryRange:     60 * time.Second,
+		DelaySeconds:   60,
+		PeriodSeconds:  60,
+		QuerySeconds:   60,
 		AWSRegion:      endpoints.UsEast1RegionID,
 		TagName:        "KubernetesCluster",
 		TagValue:       "MyCluster",

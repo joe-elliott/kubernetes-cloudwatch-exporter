@@ -104,7 +104,7 @@ func main() {
 
 			// sleep for the query range.  so if our cloudwatch queries covers 1 minute of data we request new data
 			// once a minute.
-			time.Sleep(settings.QueryRange)
+			time.Sleep(time.Duration(settings.QuerySeconds) * time.Second)
 		}
 	}()
 
