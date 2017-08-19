@@ -49,13 +49,19 @@ Currently it only supports ELB Metrics but suggestions are welcome.
 
 #### Sample Metrics
 
-Output metrics will look like:
+All cloudwatch metrics will be exposed as gauges with the following labels:
 
 ```
-k8scw_elb_metric{app="k8s-appname",elb="a5c10cde971f831e7b7120ac23c20e11",metric="Latency",namespace="k8s-namespace",statistic="p50"} 0.0025220091548062407
-k8scw_elb_metric{app="k8s-appname",elb="a5c10cde971f831e7b7120ac23c20e11",metric="Latency",namespace="k8s-namespace",statistic="p90"} 0.009827765151084543
-k8scw_elb_metric{app="k8s-appname",elb="a5c10cde971f831e7b7120ac23c20e11",metric="Latency",namespace="k8s-namespace",statistic="p99"} 0.09012280488075149
-k8scw_elb_metric{app="k8s-appname",elb="a5c10cde971f831e7b7120ac23c20e11",metric="RequestCount",namespace="k8s-namespace",statistic="Sum"} 125
+k8scw_elb_metric{k8sapp="k8s-appname",elb="a5c10cde971f831e7b7120ac23c20e11",metric="Latency",k8snamespace="k8s-namespace",statistic="p50"} 0.0025220091548062407
+k8scw_elb_metric{k8sapp="k8s-appname",elb="a5c10cde971f831e7b7120ac23c20e11",metric="Latency",k8snamespace="k8s-namespace",statistic="p90"} 0.009827765151084543
+k8scw_elb_metric{k8sapp="k8s-appname",elb="a5c10cde971f831e7b7120ac23c20e11",metric="Latency",k8snamespace="k8s-namespace",statistic="p99"} 0.09012280488075149
+k8scw_elb_metric{k8sapp="k8s-appname",elb="a5c10cde971f831e7b7120ac23c20e11",metric="RequestCount",k8snamespace="k8s-namespace",statistic="Sum"} 125
+```
+
+The application also exposes an error counter:
+
+```
+k8scw_error_total 2
 ```
 
 ### Why does this exist?

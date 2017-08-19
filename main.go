@@ -29,7 +29,7 @@ var (
 			Name:      "metric",
 			Help:      "Kubernetes ELB metrics",
 		},
-		[]string{"elb", "app", "namespace", "metric", "statistic"},
+		[]string{"elb", "k8sapp", "k8snamespace", "metric", "statistic"},
 	)
 	_errorTotal = prometheus.NewGauge(
 		prometheus.GaugeOpts{
