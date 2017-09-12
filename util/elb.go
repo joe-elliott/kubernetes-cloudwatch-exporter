@@ -45,6 +45,10 @@ func MakeELBNamesFunc(tagName string, tagValue string, appTagName string, requir
 				endSlice = len(elbNames)
 			}
 
+			if startSlice == endSlice {
+				continue
+			}
+
 			// get tags
 			loadBalancerTags, err := elbClient.DescribeTags(&elb.DescribeTagsInput{
 				LoadBalancerNames: elbNames[startSlice:endSlice],

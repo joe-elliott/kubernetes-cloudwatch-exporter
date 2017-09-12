@@ -5,6 +5,8 @@
             "name": "Local Debug",
             "type": "go",
             "request": "launch",
+            "env": {
+            },
             "mode": "debug",
             "program": "${workspaceRoot}"
         }
